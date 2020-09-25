@@ -8,7 +8,7 @@ author: Raymond de Hooge
 license: AGPLv3
 
 # TODO
-date: today's date in format YYYY-MM-DD, e.g. 2015-04-21
+date: 2020-09-25
 
 homepage: https://github.com/Raymoendow1/box3dFanCtrl
 source: https://github.com/Raymoendow1/box3dFanCtrl
@@ -92,7 +92,7 @@ compatibility:
   # If your plugin only supports Python 2 (worst case, not recommended for newly developed plugins since Python 2
   # is EOL), leave at ">=2.7,<3"
   
-  python: ">=2.7,<3"
+  python: ">=2.7,<4"
 
 ---
 

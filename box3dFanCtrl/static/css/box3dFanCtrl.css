@@ -1,1 +1,13 @@
 /* TODO: Have your plugin's CSS files generated to here. */
+
+#sliderVal {
+    height: 50px;
+    width: 30px;
+    text-align: center;
+}
+
+#sliderVal::-webkit-inner-spin-button,
+#sliderVal::-webkit-outer-spin-button {
+    cursor: pointer;
+    height: 50px;
+}
