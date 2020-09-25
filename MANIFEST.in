@@ -1,0 +1,4 @@
+include README.md
+recursive-include box3dFanCtrl/templates *
+recursive-include box3dFanCtrl/translations *
+recursive-include box3dFanCtrl/static *
