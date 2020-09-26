@@ -2,8 +2,8 @@
 
 #sliderVal {
     height: 50px;
-    width: 30px;
-    text-align: center;
+    width: 50px;
+    text-align: left;
 }
 
 #sliderVal::-webkit-inner-spin-button,

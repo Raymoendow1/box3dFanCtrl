@@ -1,14 +1,25 @@
 # coding=utf-8
 from __future__ import absolute_import
-
-
-
+import octoprint.util
 import octoprint.plugin
+from octoprint.server.util.flask import restricted_access
+from flask import jsonify, request, make_response, Response
+import json
+import requests
 
-class Box3dfanctrlPlugin(octoprint.plugin.StartupPlugin,
+class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
+						 octoprint.plugin.StartupPlugin,
 						 octoprint.plugin.SettingsPlugin,
                          octoprint.plugin.AssetPlugin,
                          octoprint.plugin.TemplatePlugin):
+
+	@staticmethod
+	def to_int(value):
+		try:
+			val = int(value)
+			return val
+		except:
+			return 0
 
 	##~~ StartupPlugin mixin
 	def on_after_startup(self):
@@ -16,7 +27,33 @@ class Box3dfanctrlPlugin(octoprint.plugin.StartupPlugin,
 
 	##~~ SettingsPlugin mixin
 	def get_settings_defaults(self):
-		return dict(slidVal=20)
+		return dict(slidVal=20
+		#, slidCheck=False
+		)
+
+
+
+	## weird flask things happening here
+	@octoprint.plugin.BlueprintPlugin.route("/setFAN", methods=["GET"])
+	def set_fan_speed(self):
+		# value = self.to_int(request.values["status"])
+		self._logger.info("New fan value")
+		return jsonify(success=True)
+
+
+
+
+	def on_settings_save(self, data):
+		slidVal_old = self._settings.get_int(['slidVal'])
+
+		#Everything before this was the before-saved value
+		octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
+		#Everything after this is the new value
+
+		slidVal_new = self._settings.get_int(['slidVal'])
+		
+		self._logger.info("Slider value: %d has been changed to: %d", slidVal_old, slidVal_new)
+
 
 	##~~ TemplatePlugin mixin
 	def get_template_configs(self):
@@ -24,17 +61,6 @@ class Box3dfanctrlPlugin(octoprint.plugin.StartupPlugin,
        		dict(type="navbar", custom_bindings=False),
        		dict(type="settings", custom_bindings=False)
     	]
-
-	def on_settings_save(self, data):
-		slidVal_old = self._settings.get_int(['slidVal'])
-
-		#Everything before this was the previous value
-		octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
-		#Everything after this is the new value
-
-		slidVal_new = self._settings.get_int(['slidVal'])
-		
-		self._logger.debug("The old slidVal: %d has been changed to: %d", slidVal_old, slidVal_new)
 
 
 	##~~ AssetPlugin mixin

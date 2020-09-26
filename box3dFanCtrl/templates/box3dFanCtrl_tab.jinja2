@@ -1,0 +1,12 @@
+<div>
+    <label for="checkbox">Slider
+    <input type="checkbox" name="checkbox" id="checkbox" class="checkbox" data-bind="checked: slidCheck">
+    </label>
+    <!-- ko if: slidCheck -->
+    <form oninput="sliderOutput.value=parseInt(myRange.value)">
+        <input type="range" class="slider" min="0" max="100" id="myRange" data-bind="value: slidVal"> =
+        <output name="sliderOutput" for="myRange"></output>
+        <button class="btn btn-primary" data-bind="click: setFan">{{ _('Go') }}</button>
+    </form>
+    <!-- /ko -->
+</div>
