@@ -90,12 +90,13 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		return temp
 
 
-	def get_temp(self):
-		# start with adc-reading
-		adc_val = self.get_adc()
-		# calculate temperature
-		temperature = self.calc_temp(adc_val)
-		return temperature
+	def get_temp(self, temp):
+		# # start with adc-reading
+		# adc_val = self.get_adc()
+		# # calculate temperature
+		# temperature = self.calc_temp(adc_val)
+		# return temperature
+		return temp
 
 	## weird flask things happening here
 	# update the actual_temp value
@@ -110,7 +111,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		auto_crl 	= True if request.values["FanCrl"] == 'true' else False
 
 		# Measure de temperature with SPI
-		actual_temp = self.get_temp() #old_temp # dummy value actual_temp = temp reading
+		actual_temp = self.get_temp(old_temp) #old_temp # dummy value actual_temp = temp reading
 
 		if (auto_crl is True):
 			if (actual_temp > target_temp):
