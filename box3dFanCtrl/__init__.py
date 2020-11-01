@@ -38,7 +38,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def on_after_startup(self):
 		self._logger.info("box3d Industrial plugin is life.")
 		# self.init_lights()
-		# self.init_temp()
+		self.init_temp()
 
 	##~~ SettingsPlugin mixin
 	def get_settings_defaults(self):
@@ -62,39 +62,39 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 ########################## FAN AND TEMPERATURE CTRL ##################################
 
-	# def init_temp(self):
-	# 	baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
-	# 	spi_channel = 0x3
-	# 	spi_flags = 0x102
-	# 	self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
+	def init_temp(self):
+		baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
+		spi_channel = 0x3
+		spi_flags = 0x102
+		self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
 
-	# def get_adc(self):
-	# 	(bytes, data) = self.pi.spi_read(self.adc, 2)
+	def get_adc(self):
+		(bytes, data) = self.pi.spi_read(self.adc, 2)
 		
-	# 	# 2 bytes (16 bits) totall
-	# 	# 4 leading zeroes and 4 trailing zeroes
-	# 	adc_val = (data[0]<<4)|(data[1]>>4)
-	# 	return adc_val
+		# 2 bytes (16 bits) totall
+		# 4 leading zeroes and 4 trailing zeroes
+		adc_val = (data[0]<<4)|(data[1]>>4)
+		return adc_val
 
-	# def calc_temp(self, adc_val):
-	# 	boefficient=3950
-	# 	seriesressistor=1000 # 1kOhm
-	# 	thermistornominal=10000 # 10kOhm in 25C
-	# 	temperaturenominal=25
-	# 	adc_resolution= 8 # in bits
+	def calc_temp(self, adc_val):
+		boefficient=3950
+		seriesressistor=1000 # 1kOhm
+		thermistornominal=10000 # 10kOhm in 25C
+		temperaturenominal=25
+		adc_resolution= 8 # in bits
 
-	# 	resis= seriesressistor * ((math.pow(2, adc_resolution)-1)/adc_val)
-	# 	temp = 1/(math.log10(resis/thermistornominal)/boefficient+1.0/(temperaturenominal+273.15))-273.15
-	# 	temp = round(temp)
-	# 	return temp
+		resis= seriesressistor * ((math.pow(2, adc_resolution)-1)/adc_val)
+		temp = 1/(math.log10(resis/thermistornominal)/boefficient+1.0/(temperaturenominal+273.15))-273.15
+		temp = round(temp)
+		return temp
 
 
-	# def get_temp(self):
-	# 	# start with adc-reading
-	# 	adc_val = self.get_adc()
-	# 	# calculate temperature
-	# 	temperature = self.calc_temp(adc_val)
-	# 	return temperature
+	def get_temp(self):
+		# start with adc-reading
+		adc_val = self.get_adc()
+		# calculate temperature
+		temperature = self.calc_temp(adc_val)
+		return temperature
 
 	## weird flask things happening here
 	# update the actual_temp value
@@ -109,8 +109,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		auto_crl 	= True if request.values["FanCrl"] == 'true' else False
 
 		# Measure de temperature with SPI
-		actual_temp = old_temp # dummy value actual_temp = temp reading
-		# Calculate temperature
+		actual_temp = self.get_temp() #old_temp # dummy value actual_temp = temp reading
 
 		if (auto_crl is True):
 			if (actual_temp > target_temp):
