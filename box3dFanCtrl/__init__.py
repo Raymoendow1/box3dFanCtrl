@@ -23,8 +23,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 						 octoprint.plugin.EventHandlerPlugin):
 
 	colors = {"red":27, "green" :22, "blue":10 }
-	pi = pigpio.pi()
-	adc=None
+	pi = None
+	adc= None
 
 	@staticmethod
 	def to_int(value):
@@ -38,6 +38,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def on_after_startup(self):
 		self._logger.info("box3d Industrial plugin is life.")
 		# self.init_lights()
+		self.pi = pigpio.pi()
 		self.init_temp()
 
 	##~~ SettingsPlugin mixin
@@ -64,7 +65,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def init_temp(self):
 		baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
-		spi_channel = 0x3
+		spi_channel = 0x2
 		spi_flags = 0x102
 		self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
 
