@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from flask.templating import render_template_string
 import octoprint.util
 import math
-import pygpio # GPIO control, make sure sudo pigpiod was called before
+import pigpio # GPIO control, make sure sudo pigpiod was called before
 import octoprint.plugin
 from octoprint.server.util.flask import restricted_access
 from flask import jsonify, request, make_response, Response, render_template
