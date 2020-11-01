@@ -1,12 +1,104 @@
+<h1>box3d Industrial</h1>
 <div>
-    <label for="checkbox">Slider
-    <input type="checkbox" name="checkbox" id="checkbox" class="checkbox" data-bind="checked: slidCheck">
-    </label>
-    <!-- ko if: slidCheck -->
-    <form oninput="sliderOutput.value=parseInt(myRange.value)">
-        <input type="range" class="slider" min="0" max="100" id="myRange" data-bind="value: slidVal"> =
-        <output name="sliderOutput" for="myRange"></output>
-        <button class="btn btn-primary" data-bind="click: setFan">{{ _('Go') }}</button>
-    </form>
+    <!-- ko ifnot: $root.login() -->
+    <input type="text" placeholder="Username" data-bind="value: $root.username" />
+    <input type="password" placeholder="Password" data-bind="value: $root.password" />
+    <input type="button" value="Log in" data-bind="click: $root.LogIn" class="btn btn-succes" />
     <!-- /ko -->
+    <!-- ko if: $root.login() -->
+    <input type="button" value="Log out" data-bind="click: $root.LogOut" class="btn btn-danger" />
+    <!-- /ko -->
+
+    <h3>Lights</h3>
+    <table>
+        <tr>
+            <td style="width: 100px;">Red</td>
+            <td><input style="display: inline;" type="button" value="ON" data-bind="click: $root.ROn, enable: $root.login" class="btn btn-succes"></td>
+            <td><input style="display: inline;" type="button" value="OFF" data-bind="click: $root.ROff, enable: $root.login" class="btn btn-danger"></td>
+        </tr>
+        <tr>
+            <td style="width: 100px;">Green</td>
+            <td><input style="display: inline;" type="button" value="ON" data-bind="click: $root.GOn, enable: $root.login" class="btn btn-succes"></td>
+            <td><input style="display: inline;" type="button" value="OFF" data-bind="click: $root.GOff, enable: $root.login" class="btn btn-danger"></td>
+        </tr>
+        <tr>
+            <td style="width: 100px;">Blue</td>
+            <td><input style="display: inline;" type="button" value="ON" data-bind="click: $root.BOn, enable: $root.login" class="btn btn-succes"></td>
+            <td><input style="display: inline;" type="button" value="OFF" data-bind="click: $root.BOff, enable: $root.login" class="btn btn-danger"></td>
+        </tr>
+        <tr>
+            <td style="width: 100px;">Not print ready</td>
+            <td><input style="display: inline;" type="button" value="ON" data-bind="click: $root.BOn, enable: $root.login" class="btn btn-succes"></td>
+            <td><input style="display: inline;" type="button" value="OFF" data-bind="click: $root.BOff, enable: $root.login" class="btn btn-danger"></td>
+        </tr>
+    </table>
+    <br>
+    <input style="display: inline" type="button" value="Stop blink" data-bind="click: $root.killBlink, enable: $root.login" class="btn btn-danger">
+    <br>
+    <br>
+</div>
+<br>
+<div>
+    <h3>Filament loading</h3>
+    <table>
+        <tr>
+            <td style="width: 100px;">Filament</td>
+            <td>
+                <input type="radio" id="Load" name="filament_state" value="filament_load" data-bind="checked: $root.fil_trsprt_s, enable: $root.login">
+                <label for="Load" style="display: inline;">Load</label>
+            </td>
+            <td>
+                <input type="radio" id="Unload" name="filament_state" value="filament_unload" data-bind="checked: $root.fil_trsprt_s, enable: $root.login">
+                <label for="Unload" style="display: inline;">Unload</label>
+            </td>
+            <td><input type="button" value="Confirm" data-bind="click: $root.filament, enable: $root.login" class="btn btn-default"></td>
+        </tr>
+    </table>
+</div>
+<br>
+<div>
+    <h3>Enclosure lock</h3>
+    <table>
+        <tr>
+            <td style="width: 100px;">Lock</td>
+            <td><input style="display: inline;" type="button" value="Unlock" data-bind="click: $root.killBlink, enable: $root.login" class="btn btn-default"></td>
+        </tr>
+    </table>
+</div>
+<br>
+<div>
+    <h3>Temperature</h3>
+    <table>
+        <tr>
+            <td style="width: 150px;"><label for="myonoffswitch">Automatic fan control</label></td>
+            <td>
+                <div class="onoffswitch">
+                    <input type="checkbox" data-bind="checked: $root.FanConfig, enable: $root.login" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" checked>
+                    <label class="onoffswitch-label" for="myonoffswitch">
+                            <span class="onoffswitch-inner"></span>
+                            <span class="onoffswitch-switch"></span>
+                    </label>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td style="width: 150px;">Fan speed</td>
+            <td><input type="range" min="1" max="100" data-bind="value: $root.fan_speed, valueUpdate: 'input', enable: (!$root.FanConfig()) && $root.login()"></td>
+            <td><output data-bind="value: fan_speed"></output> %</td>
+        </tr>
+        <!-- ko if: $root.FanConfig() -->
+        <tr>
+            <td style="width: 150px;">Target temperature</td>
+            <td><input type="range" min="1" max="200" data-bind="value: $root.box3d_tartemp, valueUpdate: 'input', enable: $root.login()"></td>
+            <td><output data-bind="value: $root.box3d_tartemp(), enable: ($root.FanConfig())"></output> &#176;C</td>
+        </tr>
+        <!-- /ko -->
+        <tr>
+            <td style="width: 150px;">Actual temperature</td>
+            <td><input type="range" min="1" max="200" data-bind="value: $root.box3d_temp, valueUpdate: 'input'" disabled="true"></td>
+            <td><output data-bind="value: box3d_temp()"></output> &#176;C</td>
+        </tr>
+    </table>
 </div>

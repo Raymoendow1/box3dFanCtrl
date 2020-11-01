@@ -10,35 +10,281 @@ $(function() {
         self.pluginName = "box3dFanCtrl";
 
         self.settings = parameters[0];
-        self.slidVal = ko.observable();
-        self.slidCheck = ko.observable(false);
+
+        self.FanConfig = ko.observable();
+        self.fan_speed = ko.observable("");
+        self.box3d_temp = ko.observable("");
+        self.box3d_tartemp = ko.observable("");
+        self.fil_trsprt_s = ko.observable("");
+
+        // Test
+        self.username = ko.observable("");
+        self.password = ko.observable("");
+        self.UserNickName = ko.observable();
+        self.UserPassword = ko.observable();
+        self.login = ko.observable();
+
+        self.slidVal = ko.observable(); //unused
+        self.LightColorRed = ko.observable(); //unused
+        self.LightColorGreen = ko.observable(); //unused
+        self.LightColorBlue = ko.observable(); //unused
 
 
-        self.onBeforeBinding = function() {
-            self.slidVal(self.settings.settings.plugins.box3dFanCtrl.slidVal());
-            // self.slidCheck(self.settings.settings.plugins.box3dFanCtrl.slidCheck());
+        // get data from python-file (only usefull for init)
+        self.bindFromSettings = function() {
+            // self.slidVal(self.settings.settings.plugins.box3dFanCtrl.slidVal());
+            self.FanConfig(self.settings.settings.plugins.box3dFanCtrl.FanConfig());
+            self.fan_speed(self.settings.settings.plugins.box3dFanCtrl.fan_speed());
+            self.box3d_tartemp(self.settings.settings.plugins.box3dFanCtrl.box3d_tartemp());
+            self.box3d_temp(self.settings.settings.plugins.box3dFanCtrl.box3d_temp());
+
+            self.fil_trsprt_s(self.settings.settings.plugins.box3dFanCtrl.fil_trsprt_s());
+
+            // self.UserNickName(self.settings.settings.plugins.box3dFanCtrl.UserNickName());
+            // self.UserPassword(self.settings.settings.plugins.box3dFanCtrl.UserPassword());
+            self.login(self.settings.settings.plugins.box3dFanCtrl.login());
+
+            self.LightColorRed(self.settings.settings.plugins.box3dFanCtrl.LightColorRed());
+            self.LightColorGreen(self.settings.settings.plugins.box3dFanCtrl.LightColorGreen());
+            self.LightColorBlue(self.settings.settings.plugins.box3dFanCtrl.LightColorBlue());
         }
 
+        self.onBeforeBinding = function() {
+            self.bindFromSettings();
+        };
 
-        self.setFan = function(item, form) {
+        self.onSettingsBeforeSave = function() {
+            self.settings.settings.plugins.box3dFanCtrl.login(self.login());
+
+            self.settings.settings.plugins.box3dFanCtrl.fil_trsprt_s(self.fil_trsprt_s());
+
+            self.settings.settings.plugins.box3dFanCtrl.fan_speed(self.fan_speed());
+            self.settings.settings.plugins.box3dFanCtrl.box3d_tartemp(self.box3d_tartemp());
+            self.settings.settings.plugins.box3dFanCtrl.box3d_temp(self.box3d_temp());
+        };
+
+        self.onSettingsShown = function() {
+            self.settings.settings.plugins.box3dFanCtrl.login(self.login());
+        };
+
+        // #################### LOG IN/OUT TEST ############################
+        self.LogIn = function(item, form) {
+            if (self.username() === self.settings.settings.plugins.box3dFanCtrl.UserNickName() && (self.password() === self.settings.settings.plugins.box3dFanCtrl.UserPassword())) {
+                self.login(true);
+            } else
+                new PNotify({
+                    title: "box3d Industrial",
+                    text: "Wrong username or password",
+                    type: "error"
+                });
+        };
+
+        // Clear username and password
+        self.LogOut = function(item, form) {
+            self.username("");
+            self.password("");
+            self.login(false);
+        };
+
+
+        // #################### FAN CONTROL ############################
+        self.tempinterval = setInterval(function(item, form) {
             var request = {
-                "status": item.slidVal()
+                "box3d_temp": self.box3d_temp(),
+                "FanSpd": self.fan_speed(),
+                "FanCrl": self.FanConfig(),
+                "TargTemp": self.box3d_tartemp()
             };
             $.ajax({
-                type: "GET",
+                url: self.buildPluginUrl("/getTemperature"),
+                type: "POST",
+                data: request,
+                dataType: "json",
+                // success: function(data) {
+                //     new PNotify({
+                //         title: "box3d Industrial",
+                //         text: "New temp " + self.box3d_temp() + " measured",
+                //         type: "success"
+                //     });
+                // }
+            });
+        }, 2000);
+
+        // #################### LED CONTROL ############################
+        self.ROn = function(item, form) {
+            var request = {
+                "red": true
+            };
+            $.ajax({
+                type: "POST",
                 dataType: "json",
                 data: request,
-                url: self.buildPluginUrl("/setFAN"),
+                url: self.buildPluginUrl("/toggleLight"),
                 success: function(data) {
                     new PNotify({
                         title: "box3d Industrial",
-                        text: "Fanspeed set to " + item.slidVal() + " succesfully",
+                        text: "Red light set to " + true + " succesfully\n",
                         type: "success"
                     });
                 }
             });
+        };
+
+        self.GOn = function(item, form) {
+            var request = {
+                "green": true
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: request,
+                url: self.buildPluginUrl("/toggleLight"),
+                success: function(data) {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Green light set to " + true + " succesfully\n",
+                        type: "success"
+                    });
+                }
+            });
+        };
+        self.BOn = function(item, form) {
+            var request = {
+                "blue": true
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: request,
+                url: self.buildPluginUrl("/toggleLight"),
+                success: function(data) {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Blue light set to " + true + " succesfully\n",
+                        type: "success"
+                    });
+                }
+            });
+        };
+
+        self.ROff = function(item, form) {
+            var request = {
+                "red": false
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: request,
+                url: self.buildPluginUrl("/toggleLight"),
+                success: function(data) {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Red light set to " + false + " succesfully\n",
+                        type: "success"
+                    });
+                }
+            });
+        };
+
+        self.GOff = function(item, form) {
+            var request = {
+                "green": false
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: request,
+                url: self.buildPluginUrl("/toggleLight"),
+                success: function(data) {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Blue light set to " + false + " succesfully\n",
+                        type: "success"
+                    });
+                }
+            });
+        };
+
+        self.BOff = function(item, form) {
+            var request = {
+                "blue": false
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: request,
+                url: self.buildPluginUrl("/toggleLight"),
+                success: function(data) {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Green light set to " + false + " succesfully\n",
+                        type: "success"
+                    });
+                }
+            });
+        };
+
+        // Change the lights received from HTML button
+        self.killBlink = function() {
+            $.ajax({
+                url: self.buildPluginUrl("/KillBlink"),
+                type: "POST",
+                dataType: "json",
+                success: function(data) {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Blink has been killed",
+                        type: "success"
+                    });
+                }
+            });
+        };
+
+
+        // #################### FILAMENT LOADING #############################
+        self.filament = function() {
+            var request = {
+                "fil_transport_state": self.fil_trsprt_s()
+            };
+
+            $.ajax({
+                url: self.buildPluginUrl("/LoadFilament"),
+                type: "POST",
+                data: request,
+                dataType: "json",
+                success: function() {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Filament state (variable): " + String(self.fil_trsprt_s()),
+                        type: "success"
+                    });
+                }
+            });
+        };
+
+        self.onDataUpdaterPluginMessage = function(plugin, data) {
+            if (typeof plugin == 'undefined') {
+                return;
+            }
+
+            if (plugin != "box3dFanCtrl") {
+                return;
+            }
+
+            if (self.settingsOpen) {
+                return;
+            }
+
+            if (data.hasOwnProperty("comptemp"))
+                if (data.comptemp)
+                    self.box3d_temp(_.sprintf("%d", data.comptemp));
+
+            if (data.hasOwnProperty("fan"))
+                if (data.fan)
+                    self.fan_speed(_.sprintf("%d", data.fan))
 
         };
+
 
         self.buildPluginUrl = function(path) {
             return window.PLUGIN_BASEURL + self.pluginName + path;
@@ -54,6 +300,6 @@ $(function() {
         // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
         dependencies: [ /* "loginStateViewModel",*/ "settingsViewModel"],
         // Elements to bind to, e.g. #settings_plugin_box3dFanCtrl, #tab_plugin_box3dFanCtrl, ...
-        elements: ["#tab_plugin_box3dFanCtrl" /*, "#settings_plugin_box3dFanCtrl" *, "#navbar_plugin_box3dFanCtrl"*/ ]
+        elements: ["#tab_plugin_box3dFanCtrl" /*, "#settings_plugin_box3dFanCtrl" /*, "#navbar_plugin_box3dFanCtrl"*/ ]
     });
 });

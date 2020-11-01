@@ -1,11 +1,53 @@
 <h1>box3d Controls</h1>
 
 <div class="control-group">
-    <label class="control-label"><h2>Fan control</h2></label>
+    <label class="control-label"><h2>Filament</h2></label>
     <div class="controls">
-        <label class="control-label" for="sliderVal">
-            Fan RPM: <input type="number" data-bind="value: settings.plugins.box3dFanCtrl.slidVal" name="sliderVal" id="sliderVal" min="0" max="100"> 
-            %
-        </label>
+        <label style="display: inline;"><h3>Measurements</h3></label>
+        <label for="extruder"><b>Distance of printer-extruder to printer-heater</b></label>
+        <div>This controls how long the filament-stepper motor will rotate.</div>
+        <input type="number" style="width: 7ch;" max="1000" id="extruder" data-bind="value: settings.plugins.box3dFanCtrl.fil_extr_v, enable: settings.plugins.box3dFanCtrl.login()"> mm
+        <br>
+        <br>
+        <label for="filament_loader"><b>Distance of filament-input to printer-extruder</b></label>
+        <div>This controls how long the 3D printer's extruder motor will rotate.</div>
+        <input type="number" style="width: 7ch;" max="10000" id="filament_loader" data-bind="value: settings.plugins.box3dFanCtrl.fil_ldr_v, enable: settings.plugins.box3dFanCtrl.login()"> mm
+    </div>
+</div>
+<br><br>
+<div class="control-group">
+    <label class="control-label"><h1>Fan speed</h1></label>
+    <div class="controls">
+
+        <label for="fanMax"><b>Maximum fan speed</b></label>
+        <div>You can only change username when logged in.</div>
+        <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
+        <input type="number" id="fanMax" min="10" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_max" />
+        <!-- /ko -->
+        <br><br>
+        <label for="fanMin"><b>Minimum fan speed</b></label>
+        <div>You can only change password when logged in.</div>
+        <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
+        <input type="number" id="fanMin" min="0" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_min" />
+        <!-- /ko -->
+    </div>
+</div>
+<br><br>
+<div class="control-group">
+    <label class="control-label"><h1>Log in</h1></label>
+    <div class="controls">
+
+        <label for="username"><b>Username change</b></label>
+
+        <div>You can only change username when logged in.</div>
+        <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
+        <input id="username" data-bind="value: settings.plugins.box3dFanCtrl.UserNickName" />
+        <!-- /ko -->
+        <br><br>
+        <label for="password"><b>Password change</b></label>
+        <div>You can only change password when logged in.</div>
+        <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
+        <input type="password" id="password" data-bind="value: settings.plugins.box3dFanCtrl.UserPassword" />
+        <!-- /ko -->
     </div>
 </div>
