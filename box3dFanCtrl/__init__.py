@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from flask.templating import render_template_string
 import octoprint.util
 import math
-# import pygpio # GPIO control, make sure sudo pigpiod was called before
+import pygpio # GPIO control, make sure sudo pigpiod was called before
 import octoprint.plugin
 from octoprint.server.util.flask import restricted_access
 from flask import jsonify, request, make_response, Response, render_template
@@ -22,9 +22,9 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 						 octoprint.plugin.TemplatePlugin,
 						 octoprint.plugin.EventHandlerPlugin):
 
-	# colors = {"red":27, "green" :22, "blue":10 }
-	# pi = pigpio.pi()
-	# adc=None
+	colors = {"red":27, "green" :22, "blue":10 }
+	pi = pigpio.pi()
+	adc=None
 
 	@staticmethod
 	def to_int(value):
