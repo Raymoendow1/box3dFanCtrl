@@ -97,9 +97,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		# # start with adc-reading
 		adc_val = self.get_adc()
 		# # calculate temperature
-		# temperature = self.calc_temp(adc_val)
-		# return temperature
-		return adc_val
+		temperature = self.calc_temp(adc_val)
+		return temperature
 
 	## weird flask things happening here
 	# update the actual_temp value
