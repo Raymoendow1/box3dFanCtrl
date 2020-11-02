@@ -164,6 +164,10 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 ##################################		LIGHT CTRL		#######################################
 
+	def init_lights(self):
+		for i in ( "red", "green", "blue"):
+			self.pi.set_mode(self.pin(i), pigpio.OUTPUT)
+
 	def set_blink(self, colors):
 		for color in colors:
 			self.pi.set_PWM_dutycycle(self.pin[color], 128)
