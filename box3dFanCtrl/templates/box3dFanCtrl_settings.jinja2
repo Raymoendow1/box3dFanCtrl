@@ -22,13 +22,13 @@
         <label for="fanMax"><b>Maximum fan speed</b></label>
         <div>You can only change username when logged in.</div>
         <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
-        <input type="number" id="fanMax" min="10" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_max" />
+        <input type="number" id="fanMax" min="10" max="1000000" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_max" />
         <!-- /ko -->
         <br><br>
         <label for="fanMin"><b>Minimum fan speed</b></label>
         <div>You can only change password when logged in.</div>
         <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
-        <input type="number" id="fanMin" min="0" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_min" />
+        <input type="number" id="fanMin" min="0" max="1000000" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_min" />
         <!-- /ko -->
     </div>
 </div>
