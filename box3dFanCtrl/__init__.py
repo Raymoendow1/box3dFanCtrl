@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from flask.templating import render_template_string
 import octoprint.util
 import math
+import time
 import pigpio # GPIO control, make sure sudo pigpiod was called before
 import octoprint.plugin
 from octoprint.server.util.flask import restricted_access
@@ -22,7 +23,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 						 octoprint.plugin.TemplatePlugin,
 						 octoprint.plugin.EventHandlerPlugin):
 
-	colors = {"red":27, "green" :22, "blue":10 }
+	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18 }
 	pi = None
 	adc= None
 
@@ -40,6 +41,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		# self.init_lights()
 		self.pi = pigpio.pi()
 		self.init_temp()
+		self.init_lock()
+		self.init_lights()
 
 	##~~ SettingsPlugin mixin
 	def get_settings_defaults(self):
@@ -163,22 +166,27 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def set_blink(self, colors):
 		for color in colors:
-			self.pi.set_PWM_dutycycle(self.colors[color], 128)
-			self.pi.set_PWM_frequency(self.colors[color], 5)
+			self.pi.set_PWM_dutycycle(self.pin[color], 128)
+			self.pi.set_PWM_frequency(self.pin[color], 5)
 	
+	def clr_blink(self, colors):
+		for color in colors:
+			self.pi.set_PWM_dutycycle(self.pin[color], 0)
+			self.pi.set_PWM_frequency(self.pin[color], 0)
+
 	def set_lights(self, colors):
 		for color in colors:
-			self.pi.write(self.colors[color], 1)
+			self.pi.write(self.pin[color], 1)
 
 	def clr_lights(self, colors):
 		for color in colors:
-			self.pi.write(self.colors[color], 0)
+			self.pi.write(self.pin[color], 0)
 
-	# @octoprint.plugin.BlueprintPlugin.route('/KillBlink', methods=["POST"])
-	# def kill_blink(self):
-	# 	command = str("killall blink")
-	# 	self.shell_command(command)
-	# 	return jsonify(success=True)
+	@octoprint.plugin.BlueprintPlugin.route('/KillBlink', methods=["POST"])
+	def kill_blink(self):
+		command = str("killall blink")
+		self.shell_command(command)
+		return jsonify(success=True)
 		
 	## weird flask things happening here
 	# get the new RGB-light value from the Tab-menu
@@ -192,6 +200,50 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			self.clr_lights([color])
 		return jsonify(success=True)
 
+	def on_event(self, event, payload):
+		if(event == "Connected"): 
+			self.set_lights(["red", "green", "blue"]) # White on
+		elif(event == "PrintStarted"):
+			self.set_lights(["red", "green", "blue"]) # White on
+		elif(event == "Upload"):
+			self.set_lights(["blue"]) # Blue on
+			self.clr_lights(["red", "green"])
+		elif(event == "Disconnected"):
+			self.set_lights(["green"])# Green on
+			self.clr_lights(["red", "blue"]) 
+		elif(event == "PrintPaused"):
+			self.set_lights(["red"])  # Red on
+			self.clr_lights(["green", "blue"]) 
+		elif(event == "Connecting"):
+			self.set_blink(["red", "green", "blue"]) # White blinking
+		elif(event == "PrintDone"):
+			self.set_blink(["blue"]) # Blue blinking
+			self.set_blink(["red", "green"])
+		elif(event == "PrintCancelled"):
+			self.set_blink(["red"]) # Red blinking
+			self.set_blink(["blue", "green"]) 
+
+
+###################### 			LOCK CTRL				##################################
+
+	def init_lock(self):
+		self.pi.set_mode(self.pin("lock"), pigpio.OUTPUT)
+		self.pi.set_mode(self.pin("lockState"), pigpio.INPUT)
+		self.pi.write(self.pin("lockState", pigpio.HIGH))
+
+	def set_lock(self):
+		self.pi.write(self.pin("lock"),pigpio.HIGH)
+		time.sleep(2)
+		self.pi.write(self.pin("lock"),pigpio.LOW)
+
+	@octoprint.plugin.BlueprintPlugin.route('/unlock', methods=["POST"])
+	def set_lock(self):
+		temp = self.to_int(request.values["temperature"])
+		if temp>50:
+			return jsonify(success=False, error=True) # chamber is to hot, could be dangerous?
+		else:
+			self.set_lock()
+		return jsonify(success=True)
 
 
 ############## 					FILAMENT CTRL					 #########################
@@ -216,24 +268,6 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		# load_filament_extruder(meters) # <== dit is Gcode: G91 - G21 - G1 E-100 F1000 (zie to_do.klad)
 
 		return jsonify(success=True) # Spin steppermotor
-	
-	def on_event(self, event, payload):
-		if(event == "Connected"): 
-			pass # White on
-		elif(event == "PrintStarted"):
-			pass # White on
-		elif(event == "Upload"):
-			pass # Blue on
-		elif(event == "Disconnected"):
-			pass # Green on
-		elif(event == "PrintPaused"):
-			pass # Red on
-		elif(event == "Connecting"):
-			pass # White blinking
-		elif(event == "PrintDone"):
-			pass # Blue blinking
-		elif(event == "PrintCancelled"):
-			pass # Red blinking
 
 	def shell_command(self, command):
 		# self._logger.info(command + " function activated")

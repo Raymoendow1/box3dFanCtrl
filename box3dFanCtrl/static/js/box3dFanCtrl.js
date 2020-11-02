@@ -246,6 +246,32 @@ $(function() {
             });
         };
 
+        // ###################### 			LOCK CTRL				##################################
+        self.Unlock = function() {
+            var request = {
+                "temperature": self.box3d_temp()
+            };
+            $.ajax({
+                url: self.buildPluginUrl("/unlock"),
+                type: "POST",
+                data: request,
+                dataType: "json",
+                success: function() {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Unlocked!",
+                        type: "success"
+                    });
+                },
+                error: function(data) {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Wait for the chamber to be less than 50 C",
+                        type: "error"
+                    });
+                }
+            });
+        };
 
         // #################### FILAMENT LOADING #############################
         self.filament = function() {
