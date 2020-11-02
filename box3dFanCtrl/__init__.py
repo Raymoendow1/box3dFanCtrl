@@ -224,10 +224,10 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def set_lock(self):
 		temp = self.to_int(request.values["temperature"])
 		self._logger.info("temp val(for lock)= %d" % temp)
-		if (temp>50):
-			return jsonify(success=False)
+		# if (temp>50):
+		# 	return jsonify(success=False)
 			# return jsonify(error=True) # chamber is to hot, could be dangerous?
-		self.set_lock()
+		# self.set_lock()
 		return jsonify(success=True)
 
 
