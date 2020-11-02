@@ -263,7 +263,7 @@ $(function() {
                         type: "success"
                     });
                 },
-                error: function(data) {
+                error: function() {
                     new PNotify({
                         title: "box3d Industrial",
                         text: "Wait for the chamber to be less than 50 C",

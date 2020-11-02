@@ -48,7 +48,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def get_settings_defaults(self):
 		return dict(
 			slidVal=20, FanConfig=True, box3d_temp="25", box3d_tartemp="60"
-			, fan_speed="10", fan_speed_min="5", fan_speed_max="90" 			# temp crl vars
+			, fan_speed="10", fan_speed_min="5", fan_speed_max="900000" 		# temp crl vars
 			, LightColorRed=False, LightColorGreen=False, LightColorBlue=False  # Light vars
 			, fil_trsprt_s=True, fil_ldr_v="1000", fil_extr_v="50"				# filament loader vars
 			, UserNickName="box3d", UserPassword="Industrial", login=False		# log in
@@ -82,10 +82,10 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def calc_temp(self, adc_val):
 		boefficient=3950
-		seriesressistor=1000 # 1kOhm
+		seriesressistor=1000 	# 1kOhm
 		thermistornominal=10000 # 10kOhm in 25C
 		temperaturenominal=25
-		adc_resolution= 8 # in bits
+		adc_resolution= 8 		# in bits
 
 		resis= seriesressistor * ((math.pow(2, adc_resolution)-1)/adc_val)
 		temp = 1/(math.log(resis/thermistornominal)/boefficient+1.0/(temperaturenominal+273.15))-273.15
@@ -114,7 +114,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		auto_crl 	= True if request.values["FanCrl"] == 'true' else False
 
 		# Measure de temperature with SPI
-		actual_temp = self.get_temp(old_temp) #old_temp # dummy value actual_temp = temp reading
+		actual_temp = 60#self.get_temp(old_temp) #old_temp # dummy value actual_temp = temp reading
 
 		if (auto_crl is True):
 			if (actual_temp > target_temp):
@@ -123,17 +123,11 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			else:
 				# minimale waarde fans
 				fanval = fanSpeedMin
-		# else:
-		# 	# Manual fan control with PWM
 		self.set_fanspeed(fanval)
-
-
-		# actual_temp+= int(-1*math.atan((fanval-10)/20)*7) # dummy value to simulate
 		
-		self._logger.info("fanval=%d | target_temp=%d | old_temp=%d | auto_crl=%d",fanval, target_temp, old_temp,auto_crl)
+		# self._logger.info("fanval=%d | target_temp=%d | old_temp=%d | auto_crl=%d",fanval, target_temp, old_temp,auto_crl)
 		self._plugin_manager.send_plugin_message(self._identifier, dict(comptemp=actual_temp, fan=fanval))
 		return jsonify(success=True)
-
 
 	# Is auto-temp control enabled?
 	# Zo niet gebruik de ingestelde waarde 
@@ -144,19 +138,10 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		self.set_fanspeed(fanVal) # PWM control
 		return jsonify(success=True)
 
-
-	# Jat deze code van arduino regeling
-	def autoTempControl(self):
-		while (self.auto_crl is False):
-			fanval = 20 # maak dit automatisch
-			self.set_fanspeed(fanval)
-			# self._logger.info("Withing autoTempControlLoop")
-			# update fan value to GUI
-			self._plugin_manager.send_plugin_message(self._identifier, dict(fan=fanval))
-
 	def set_fanspeed(self, pwm_val):
 			# set pwm to pwm_val
-			self.pi.hardware_PWM(12, 25000, pwm_val)
+			fanval=1000000-pwm_val
+			self.pi.hardware_PWM(12, 25000, fanval)
 
 
 ##################################		LIGHT CTRL		#######################################
@@ -239,8 +224,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	@octoprint.plugin.BlueprintPlugin.route('/unlock', methods=["POST"])
 	def set_lock(self):
 		temp = self.to_int(request.values["temperature"])
-		if temp>50:
-			return jsonify(success=False, error=True) # chamber is to hot, could be dangerous?
+		if (temp>50):
+			return jsonify(error=True) # chamber is to hot, could be dangerous?
 		else:
 			self.set_lock()
 		return jsonify(success=True)
