@@ -217,8 +217,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def set_unlock(self):
 		self.pi.write(self.pin("lock"),pigpio.HIGH)
-		
-	def set_unlock(self):
+
+	def set_lock(self):
 		self.pi.write(self.pin("lock"),pigpio.LOW)
 		# time.sleep(2)
 		# self.pi.write(self.pin("lock"),pigpio.LOW)
@@ -232,8 +232,6 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		
 	@octoprint.plugin.BlueprintPlugin.route('/lock', methods=["POST"])
 	def set_lock(self):
-		temp = self.to_int(request.values["temperature"])
-		self._logger.info("temp val(for lock)= %d" % temp)
 		self.set_lock()
 		return jsonify(success=True)
 
