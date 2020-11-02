@@ -38,7 +38,6 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	##~~ StartupPlugin mixin
 	def on_after_startup(self):
 		self._logger.info("box3d Industrial plugin is life.")
-		# self.init_lights()
 		self.pi = pigpio.pi()
 		self.init_temp()
 		self.init_lock()
@@ -69,7 +68,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def init_temp(self):
 		baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
 		spi_channel = 0x2
-		spi_flags = 0x102
+		spi_flags = 0x162
 		self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
 
 	def get_adc(self):
@@ -113,7 +112,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		fanSpeedMin = self._settings.get_int(["fan_speed_min"])
 
 		# Measure de temperature with SPI
-		actual_temp = self.get_temp() #old_temp # dummy value actual_temp = temp reading
+		actual_temp = self.get_temp() #old_temp # temp reading
 
 		if (auto_crl is True):
 			if (actual_temp > target_temp):
@@ -232,7 +231,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		
 	@octoprint.plugin.BlueprintPlugin.route('/lock', methods=["POST"])
 	def lock(self):
-		# self.set_lock()
+		self.set_lock()
 		return jsonify(success=True)
 
 
