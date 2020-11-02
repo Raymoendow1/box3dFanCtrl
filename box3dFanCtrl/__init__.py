@@ -154,55 +154,42 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def set_fanspeed(self, pwm_val):
 			# set pwm to pwm_val
-			pass
+			#pwm_val is max 100 and min 1
+			pwm_val*=10000
+			self.pi.hardware_PWM(12, 25000, pwm_val)
 
 
 ##################################		LIGHT CTRL		#######################################
 
-	# def init_lights(self):
-	# 	if not self.pi.connected:
-	# 		self._logger.info("PIGPIO IN LIGHTS FAILED TO CONNECT!")
-	# 		exit()
-
-	# 	# red, green blue
-	# 	for pin in self.colors:
-	# 		self.lights.set_mode(self.colors[pin], pigpio.OUTPUT)
-
-	# def set_light(self, colors_on):
-	# 	for color in self.colors:
-	# 		for colon in colors_on:
-	# 			if (color==colon):
-	# 				self.lights.write(self.colors[color],1)
-	# 			else:
-	# 				self.lights.write(self.colors[color],0)
+	def set_blink(self, colors):
+		for color in colors:
+			self.pi.set_PWM_dutycycle(self.colors[color], 128)
+			self.pi.set_PWM_frequency(self.colors[color], 5)
 	
-	# def set_blink(self, color):
-	# 	if(color == "red"):
-	# 		GPIO.write(27, 1)
-	# 	else:
-	# 		GPIO.write(27, 0)
-	# 	if(color == "green"):
-	# 		GPIO.write(22, 1)
-	# 	else:
-	# 		GPIO.write(22, 0)
-	# 	if(color == "blue"):
-	# 		GPIO.write(10, 1)
-	# 	else:
-	# 		GPIO.write(10, 0)
+	def set_lights(self, colors):
+		for color in colors:
+			self.pi.write(self.colors[color], 1)
 
-	@octoprint.plugin.BlueprintPlugin.route('/KillBlink', methods=["POST"])
-	def kill_blink(self):
-		command = str("killall blink")
-		self.shell_command(command)
-		return jsonify(success=True)
+	def clr_lights(self, colors):
+		for color in colors:
+			self.pi.write(self.colors[color], 0)
+
+	# @octoprint.plugin.BlueprintPlugin.route('/KillBlink', methods=["POST"])
+	# def kill_blink(self):
+	# 	command = str("killall blink")
+	# 	self.shell_command(command)
+	# 	return jsonify(success=True)
 		
 	## weird flask things happening here
 	# get the new RGB-light value from the Tab-menu
 	@octoprint.plugin.BlueprintPlugin.route("/toggleLight", methods=["POST"])
 	def toggle_lights(self):
-		redLight = True if request.values["red"] == 'true' else False 
-		# greenLight = True if request.values["green"] == 'true' else False 
-		# blueLight = True if request.values["blue"] == 'true' else False 
+		color = request.values["color"]
+		lightState = True if request.values["state"] == 'true' else False 
+		if (lightState == True):
+			self.set_lights(color)
+		elif(lightState==False):
+			self.clr_lights(color)
 		return jsonify(success=True)
 
 

@@ -108,12 +108,13 @@ $(function() {
                 //     });
                 // }
             });
-        }, 2000);
+        }, 500);
 
         // #################### LED CONTROL ############################
         self.ROn = function(item, form) {
             var request = {
-                "red": true
+                "color": "red",
+                "state": true
             };
             $.ajax({
                 type: "POST",
@@ -132,7 +133,8 @@ $(function() {
 
         self.GOn = function(item, form) {
             var request = {
-                "green": true
+                "color": "green",
+                "state": true
             };
             $.ajax({
                 type: "POST",
@@ -150,7 +152,8 @@ $(function() {
         };
         self.BOn = function(item, form) {
             var request = {
-                "blue": true
+                "color": "blue",
+                "state": true
             };
             $.ajax({
                 type: "POST",
@@ -169,7 +172,8 @@ $(function() {
 
         self.ROff = function(item, form) {
             var request = {
-                "red": false
+                "color": "red",
+                "state": false
             };
             $.ajax({
                 type: "POST",
@@ -188,7 +192,8 @@ $(function() {
 
         self.GOff = function(item, form) {
             var request = {
-                "green": false
+                "color": "green",
+                "state": false
             };
             $.ajax({
                 type: "POST",
@@ -207,7 +212,8 @@ $(function() {
 
         self.BOff = function(item, form) {
             var request = {
-                "blue": false
+                "color": "blue",
+                "state": false
             };
             $.ajax({
                 type: "POST",
