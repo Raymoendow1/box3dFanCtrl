@@ -188,8 +188,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route('/KillBlink', methods=["POST"])
 	def kill_blink(self):
-		command = str("killall blink")
-		self.shell_command(command)
+		self.clr_blink(("red", "green", "blue"))
 		return jsonify(success=True)
 		
 	## weird flask things happening here
