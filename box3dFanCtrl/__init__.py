@@ -187,9 +187,9 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		color = request.values["color"]
 		lightState = True if request.values["state"] == 'true' else False 
 		if (lightState == True):
-			self.set_lights(color)
+			self.set_lights([color])
 		elif(lightState==False):
-			self.clr_lights(color)
+			self.clr_lights([color])
 		return jsonify(success=True)
 
 
