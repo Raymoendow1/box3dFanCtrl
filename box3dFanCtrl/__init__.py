@@ -227,12 +227,12 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def unlock(self):
 		temp = self.to_int(request.values["temperature"])
 		self._logger.info("temp val(for lock)= %d" % temp)
-		self.set_unlock()
+		# self.set_unlock()
 		return jsonify(success=True)
 		
 	@octoprint.plugin.BlueprintPlugin.route('/lock', methods=["POST"])
 	def lock(self):
-		self.set_lock()
+		# self.set_lock()
 		return jsonify(success=True)
 
 
