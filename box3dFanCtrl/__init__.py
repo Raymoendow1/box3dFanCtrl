@@ -123,10 +123,9 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			else:
 				# minimale waarde fans
 				fanval = fanSpeedMin
-		else:
-			# Manual fan control with PWM
-			# self.set_fanspeed(fanval)
-			pass
+		# else:
+		# 	# Manual fan control with PWM
+		self.set_fanspeed(fanval)
 
 
 		# actual_temp+= int(-1*math.atan((fanval-10)/20)*7) # dummy value to simulate
