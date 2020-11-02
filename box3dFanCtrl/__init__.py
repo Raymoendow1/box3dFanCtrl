@@ -85,7 +85,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		adc_resolution= 8 # in bits
 
 		resis= seriesressistor * ((math.pow(2, adc_resolution)-1)/adc_val)
-		temp = 1/(math.log10(resis/thermistornominal)/boefficient+1.0/(temperaturenominal+273.15))-273.15
+		temp = 1/(math.log(resis/thermistornominal)/boefficient+1.0/(temperaturenominal+273.15))-273.15
 		temp = round(temp)
 		return temp
 
@@ -126,7 +126,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			pass
 
 
-		actual_temp+= int(-1*math.atan((fanval-10)/20)*7) # dummy value to simulate
+		# actual_temp+= int(-1*math.atan((fanval-10)/20)*7) # dummy value to simulate
 		
 		self._logger.info("fanval=%d | target_temp=%d | old_temp=%d | auto_crl=%d",fanval, target_temp, old_temp,auto_crl)
 		self._plugin_manager.send_plugin_message(self._identifier, dict(comptemp=actual_temp, fan=fanval))
