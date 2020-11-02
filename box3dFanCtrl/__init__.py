@@ -114,7 +114,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		auto_crl 	= True if request.values["FanCrl"] == 'true' else False
 
 		# Measure de temperature with SPI
-		actual_temp = 60#self.get_temp(old_temp) #old_temp # dummy value actual_temp = temp reading
+		actual_temp = self.get_temp(old_temp) #old_temp # dummy value actual_temp = temp reading
 
 		if (auto_crl is True):
 			if (actual_temp > target_temp):
@@ -224,10 +224,10 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	@octoprint.plugin.BlueprintPlugin.route('/unlock', methods=["POST"])
 	def set_lock(self):
 		temp = self.to_int(request.values["temperature"])
+		self._logger_info("temp val(for lock)= %d" % temp)
 		if (temp>50):
 			return jsonify(error=True) # chamber is to hot, could be dangerous?
-		else:
-			self.set_lock()
+		self.set_lock()
 		return jsonify(success=True)
 
 
