@@ -211,16 +211,18 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def init_lock(self):
 		self.pi.set_mode(self.pin["lock"], pigpio.OUTPUT)
+		self.pi.write(self.pin["lock"], pigpio.LOW)
 		self.pi.set_mode(self.pin["lockState"], pigpio.INPUT)
 		self.pi.write(self.pin["lockState"], pigpio.HIGH)
 
 	def set_unlock(self):
 		self.pi.write(self.pin["lock"],pigpio.HIGH)
+		time.sleep(1.5)
+		self.pi.write(self.pin["lock"],pigpio.LOW)
+
 
 	def set_lock(self):
 		self.pi.write(self.pin["lock"],pigpio.LOW)
-		# time.sleep(2)
-		# self.pi.write(self.pin["lock"],pigpio.LOW)
 
 	@octoprint.plugin.BlueprintPlugin.route('/unlock', methods=["POST"])
 	def unlock(self):
