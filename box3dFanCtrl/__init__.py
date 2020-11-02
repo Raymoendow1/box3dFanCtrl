@@ -147,7 +147,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def init_lights(self):
 		for i in ( "red", "green", "blue"):
-			self.pi.set_mode(self.pin(i), pigpio.OUTPUT)
+			self.pi.set_mode(self.pin[i], pigpio.OUTPUT)
 
 	def set_blink(self, colors):
 		for color in colors:
@@ -211,17 +211,17 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 ###################### 			LOCK CTRL				##################################
 
 	def init_lock(self):
-		self.pi.set_mode(self.pin("lock"), pigpio.OUTPUT)
-		self.pi.set_mode(self.pin("lockState"), pigpio.INPUT)
-		self.pi.write(self.pin("lockState", pigpio.HIGH))
+		self.pi.set_mode(self.pin["lock"], pigpio.OUTPUT)
+		self.pi.set_mode(self.pin["lockState"], pigpio.INPUT)
+		self.pi.write(self.pin["lockState"], pigpio.HIGH)
 
 	def set_unlock(self):
-		self.pi.write(self.pin("lock"),pigpio.HIGH)
+		self.pi.write(self.pin["lock"],pigpio.HIGH)
 
 	def set_lock(self):
-		self.pi.write(self.pin("lock"),pigpio.LOW)
+		self.pi.write(self.pin["lock"],pigpio.LOW)
 		# time.sleep(2)
-		# self.pi.write(self.pin("lock"),pigpio.LOW)
+		# self.pi.write(self.pin["lock"],pigpio.LOW)
 
 	@octoprint.plugin.BlueprintPlugin.route('/unlock', methods=["POST"])
 	def unlock(self):
