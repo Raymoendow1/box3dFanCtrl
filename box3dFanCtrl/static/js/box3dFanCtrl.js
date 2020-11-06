@@ -97,7 +97,7 @@ $(function() {
             };
             $.ajax({
                 url: self.buildPluginUrl("/getTemperature"),
-                type: "POST",
+                type: "GET",
                 data: request,
                 dataType: "json",
                 // success: function(data) {

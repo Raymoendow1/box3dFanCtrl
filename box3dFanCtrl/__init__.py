@@ -102,7 +102,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	## weird flask things happening here
 	# update the actual_temp value
-	@octoprint.plugin.BlueprintPlugin.route("/getTemperature", methods=["POST"])
+	@octoprint.plugin.BlueprintPlugin.route("/getTemperature", methods=["GET"])
 	def get_temperature(self):
 
 		old_temp 	= self.to_int(request.values["box3d_temp"])
@@ -213,8 +213,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def init_lock(self):
 		self.pi.set_mode(self.pin["lock"], pigpio.OUTPUT)
 		self.pi.write(self.pin["lock"], pigpio.LOW)
-		self.pi.set_mode(self.pin["lockState"], pigpio.INPUT)
-		self.pi.write(self.pin["lockState"], pigpio.HIGH)
+		self.pi.set_mode(self.pin["lockStat"], pigpio.INPUT)
+		self.pi.write(self.pin["lockStat"], pigpio.HIGH)
 
 	def set_unlock(self):
 		self.pi.write(self.pin["lock"],pigpio.HIGH)
