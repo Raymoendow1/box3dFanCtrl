@@ -120,11 +120,11 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 				# Stuur fans aan
 				fanval = fanSpeedMax
 			else:
-				# minimale waarde fans
+				# Minimale waarde fans
 				fanval = fanSpeedMin
 		self.set_fanspeed(fanval)
 		
-		# self._logger.info("fanval=%d | target_temp=%d | old_temp=%d | auto_crl=%d",fanval, target_temp, old_temp,auto_crl)
+		self._logger.info("target_temp=%d | old_temp=%d | auto_crl=%d",target_temp, old_temp,auto_crl)
 		self._plugin_manager.send_plugin_message(self._identifier, dict(comptemp=actual_temp, fan=fanval))
 		return jsonify(success=True)
 
