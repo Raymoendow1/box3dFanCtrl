@@ -304,7 +304,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		# load_filament_loader(meters)
 		# load_filament_extruder(meters) # <== dit is Gcode: G91 - G21 - G1 E-100 F1000 (zie to_do.klad)
 
-		self.pi.hardware_PWM(self.pin["ldr"], rot_fr, 0)
+		self.pi.hardware_PWM(self.pin["ldr"], 0, 0)
 		self.pi.write(self.pin["dir"],pigpio.LOW)
 		return jsonify(success=True) # Spin steppermotor
 	
