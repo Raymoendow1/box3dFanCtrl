@@ -205,15 +205,6 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		elif(event == Events.UPLOAD):
 			self.set_lights(["blue"]) # Blue on
 			self.clr_lights(["red", "green"])
-		# elif(event == Events.PRINT_PAUSED):
-		# 	self.set_lights(["red"])  # Red on
-		# 	self.clr_lights(["green", "blue"]) 
-		# elif(event == Events.PRINT_DONE):
-		# 	self.set_blink(["blue"]) # Blue blinking
-		# 	self.clr_blink(["red", "green"])
-		# elif(event == Events.PRINT_CANCELLED):
-		# 	self.set_blink(["red"])  # Red blinking
-		# 	self.clr_blink(["blue", "green"]) 
 		elif(event == "PrinterStateChanged"):
 			self._logger.info("Printer state changed to {}".format(payload['state_string']))
 			# if (payload['state_string'] == "Operational"):
@@ -221,7 +212,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			if(payload['state_string'] == "Printing"):
 				self.clr_blink(self.color["white"]) 
 				self.set_lights(self.color["white"]) 	  # white
-			elif(payload['state_string'] == "Paused"):
+			elif(payload['state_string'] == "Pausing"):
 				self.set_lights(["red"])  				  # Red
 				self.clr_lights(["green", "blue"]) 
 			elif(payload['state_string'] == "Cancelling"):
@@ -273,14 +264,14 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	@octoprint.plugin.BlueprintPlugin.route('/LoadFilament', methods=["POST"])
 	def filament(self):
 		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
-		fil_noz	  =self._settings.get(["fil_noz"])
-		dst_extr  =self._settings.get(["fil_extruder_value"]) # distance between extruder-3d printer and hot-end
-		dst_loader=self._settings.get(["fil_loader_value"]) # distance between box3d filament input and extruder-3d printer
+		fil_noz	  =self.to_int(self._settings.get(["fil_noz"]))
+		dst_extr  =self.to_int(self._settings.get(["fil_extruder_value"])) # distance between extruder-3d printer and hot-end
+		dst_loader=self.to_int(self._settings.get(["fil_loader_value"])) # distance between box3d filament input and extruder-3d printer
 		dir = True if request.values["fil_transport_state"] == 'filament_load' else False # true= loading, false=unloading
 		steps  = 200 # number of steps in the motor for full rotation
 		rot_fr = 50 # frequency of rotation
 		fil_feedRate = (drv_wheel*math.pi)/(steps/rot_fr) #200 steps, 50 Hz = 200/50 = 1x round in 4 sec
-		sec = (dst_loader/fil_feedRate)
+		sec = float(dst_loader/fil_feedRate)
 
 
 		# Heat nozzel to desired temperature
