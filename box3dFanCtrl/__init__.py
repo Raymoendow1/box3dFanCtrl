@@ -3,18 +3,19 @@ from __future__ import absolute_import
 
 from flask.templating import render_template_string
 import octoprint.util
-import math
-import time
-import pigpio # GPIO control, make sure sudo pigpiod was called before
 import octoprint.plugin
+from octoprint.events import Events
 from octoprint.server.util.flask import restricted_access
 from flask import jsonify, request, make_response, Response, render_template
+from subprocess import Popen, PIPE
 import json
 import requests
-from subprocess import Popen, PIPE
 import sys
 import glob
 import os
+import pigpio # GPIO control, make sure sudo pigpiod was called before
+import math
+import time
 
 class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 						 octoprint.plugin.StartupPlugin,
@@ -23,7 +24,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 						 octoprint.plugin.TemplatePlugin,
 						 octoprint.plugin.EventHandlerPlugin):
 
-	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18 }
+	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
 	pi = None
 	adc= None
 
@@ -50,7 +51,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			slidVal=20, FanConfig=True, box3d_temp="25", box3d_tartemp="60"
 			, fan_speed="100", fan_speed_min="5", fan_speed_max="900000" 		# temp crl vars
 			, LightColorRed=False, LightColorGreen=False, LightColorBlue=False  # Light vars
-			, fil_trsprt_s=True, fil_ldr_v="1000", fil_extr_v="50"				# filament loader vars
+			, fil_trsprt_s=True, fil_ldr_v="1000", fil_extr_v="50"
+			, fil_dw="100", fil_noz="200"										# filament loader vars
 			, UserNickName="box3d", UserPassword="Industrial", login=False		# log in
 			
 		)
@@ -124,7 +126,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 				fanval = fanSpeedMin
 		self.set_fanspeed(fanval)
 		
-		self._logger.info("target_temp=%d | old_temp=%d | auto_crl=%d",target_temp, old_temp,auto_crl)
+		# self._logger.info("target_temp=%d | old_temp=%d | auto_crl=%d",target_temp, old_temp,auto_crl)
 		self._plugin_manager.send_plugin_message(self._identifier, dict(comptemp=actual_temp, fan=fanval))
 		return jsonify(success=True)
 
@@ -185,26 +187,26 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		return jsonify(success=True)
 
 	def on_event(self, event, payload):
-		if(event == "Connected"): 
+		if(event is Events.CONNECTED): 
 			self.set_lights(["red", "green", "blue"]) # White on
-		elif(event == "PrintStarted"):
+		elif(event is Events.PRINT_STARTED or Events.PRINT_RESUMED):
 			self.set_lights(["red", "green", "blue"]) # White on
-		elif(event == "Upload"):
+		elif(event is Events.UPLOAD):
 			self.set_lights(["blue"]) # Blue on
 			self.clr_lights(["red", "green"])
-		elif(event == "Disconnected"):
+		elif(event is Events.DISCONNECTED):
 			self.set_lights(["green"])# Green on
 			self.clr_lights(["red", "blue"]) 
-		elif(event == "PrintPaused"):
+		elif(event is Events.PRINT_PAUSED):
 			self.set_lights(["red"])  # Red on
 			self.clr_lights(["green", "blue"]) 
-		elif(event == "Connecting"):
+		elif(event is Events.CONNECTING):
 			self.set_blink(["red", "green", "blue"]) # White blinking
-		elif(event == "PrintDone"):
+		elif(event is Events.PRINT_DONE):
 			self.set_blink(["blue"]) # Blue blinking
 			self.clr_blink(["red", "green"])
-		elif(event == "PrintCancelled"):
-			self.set_blink(["red"]) # Red blinking
+		elif(event is Events.PRINT_CANCELLED):
+			self.set_blink(["red"])  # Red blinking
 			self.clr_blink(["blue", "green"]) 
 
 
@@ -251,15 +253,50 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 ##
 	@octoprint.plugin.BlueprintPlugin.route('/LoadFilament', methods=["POST"])
 	def filament(self):
-		dst_extr = self._settings.get(["fil_extruder_value"]) # distance between extruder-3d printer and hot-end
+		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
+		fil_noz	  =self._settings.get(["fil_noz"])
+		dst_extr  =self._settings.get(["fil_extruder_value"]) # distance between extruder-3d printer and hot-end
 		dst_loader=self._settings.get(["fil_loader_value"]) # distance between box3d filament input and extruder-3d printer
 		dir = True if request.values["fil_transport_state"] == 'filament_load' else False # true= loading, false=unloading
+		steps  = 200 # number of steps in the motor for full rotation
+		rot_fr = 50 # frequency of rotation
+		fil_feedRate = (drv_wheel*math.pi)/(steps/rot_fr) #200 steps, 50 Hz = 200/50 = 1x round in 4 sec
+		sec = (dst_loader/fil_feedRate)
+
+
+		# Heat nozzel to desired temperature
+		self.send_gcode_command("M104 S{}".format(fil_noz))
+		
+		# Load filament
+		if (dir==True): 
+			self.pi.write(self.pin["dir"],pigpio.HIGH)
+			self.pi.hardware_PWM(self.pin["ldr"], rot_fr, 500000) #50% Duty Cycle
+			# wait for filament to reach the 3D-printer
+			time.sleep(sec) 
+			# Load filament in the printer
+			self.send_gcode_command("G1 E{} F500".format(dst_extr))
+		
+		# Unload filament 
+		else: 
+			# move printer-extruder out first
+			self.send_gcode_command("G1 E-{} F500".format(dst_extr))
+			# then filament-steppermotor
+			self.pi.hardware_PWM(self.pin["ldr"], rot_fr, 500000)
+			time.sleep(sec+1) # system unloads longer to make sure everything is out
 
 		# Maak volgorde afhankelijk van in- en uitladen
 		# load_filament_loader(meters)
 		# load_filament_extruder(meters) # <== dit is Gcode: G91 - G21 - G1 E-100 F1000 (zie to_do.klad)
 
+		self.pi.write(self.pin["dir"],pigpio.LOW)
 		return jsonify(success=True) # Spin steppermotor
+	
+	def send_gcode_command(self, command):
+			for line in command.split('\n'):
+				if line:
+					self._printer.commands(line.strip())
+					self._logger.info("Sending GCODE command: %s", line.strip())
+					time.sleep(0.2)
 
 	def shell_command(self, command):
 		# self._logger.info(command + " function activated")
