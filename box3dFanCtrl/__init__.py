@@ -187,25 +187,25 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		return jsonify(success=True)
 
 	def on_event(self, event, payload):
-		if(event is Events.CONNECTED): 
+		if(event == Events.CONNECTED): 
 			self.set_lights(["red", "green", "blue"]) # White on
-		elif(event is Events.PRINT_STARTED or Events.PRINT_RESUMED):
+		elif(event == (Events.PRINT_STARTED or Events.PRINT_RESUMED)):
 			self.set_lights(["red", "green", "blue"]) # White on
-		elif(event is Events.UPLOAD):
+		elif(event == Events.UPLOAD):
 			self.set_lights(["blue"]) # Blue on
 			self.clr_lights(["red", "green"])
-		elif(event is Events.DISCONNECTED):
+		elif(event == Events.DISCONNECTED):
 			self.set_lights(["green"])# Green on
 			self.clr_lights(["red", "blue"]) 
-		elif(event is Events.PRINT_PAUSED):
+		elif(event == Events.PRINT_PAUSED):
 			self.set_lights(["red"])  # Red on
 			self.clr_lights(["green", "blue"]) 
-		elif(event is Events.CONNECTING):
+		elif(event == Events.CONNECTING):
 			self.set_blink(["red", "green", "blue"]) # White blinking
-		elif(event is Events.PRINT_DONE):
+		elif(event == Events.PRINT_DONE):
 			self.set_blink(["blue"]) # Blue blinking
 			self.clr_blink(["red", "green"])
-		elif(event is Events.PRINT_CANCELLED):
+		elif(event == Events.PRINT_CANCELLED):
 			self.set_blink(["red"])  # Red blinking
 			self.clr_blink(["blue", "green"]) 
 
