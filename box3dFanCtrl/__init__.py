@@ -45,13 +45,13 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		self.init_temp()
 		self.init_lock()
 		self.init_lights()
-		self.set_fanspeed(100)
+		self.set_fanspeed(1)
 
 	##~~ SettingsPlugin mixin
 	def get_settings_defaults(self):
 		return dict(
 			slidVal=20, FanConfig=True, box3d_temp="25", box3d_tartemp="60"
-			, fan_speed="100", fan_speed_min="5", fan_speed_max="900000" 		# temp crl vars
+			, fan_speed="1", fan_speed_min="5", fan_speed_max="900000" 		# temp crl vars
 			, LightColorRed=False, LightColorGreen=False, LightColorBlue=False  # Light vars
 			, fil_trsprt_s=True, fil_ldr_v="1000", fil_extr_v="50"
 			, fil_dw="100", fil_noz="200"										# filament loader vars
