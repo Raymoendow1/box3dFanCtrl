@@ -264,7 +264,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 ##
 	@octoprint.plugin.BlueprintPlugin.route('/LoadFilament', methods=["POST"])
 	def filament(self):
-		if(not(self._printer.is_offline() or self._printer.is_ready())):
+		if(not(self._printer.is_closed_or_error() or self._printer.is_ready())):
 			return jsonify(succes=False)
 		self._logger.info("Printer ready for filamentchange!")
 		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
