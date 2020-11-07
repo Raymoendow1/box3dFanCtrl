@@ -27,6 +27,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
 	pi = None
 	adc= None
+	color = { "white":["red","green","blue"]}
 
 	@staticmethod
 	def to_int(value):
@@ -163,6 +164,11 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def set_lights(self, colors):
 		for color in colors:
+			if(color == "white"):
+				self.pi.write(self.pin["red"], 1)
+				self.pi.write(self.pin["green"], 1)
+				self.pi.write(self.pin["blue"], 1)
+				break
 			self.pi.write(self.pin[color], 1)
 
 	def clr_lights(self, colors):
@@ -187,21 +193,21 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		return jsonify(success=True)
 
 	def on_event(self, event, payload):
-		if(event == Events.CONNECTED): 
-			self.set_lights(["red", "green", "blue"]) # White on
+		if(event == Events.CONNECTING):
+			self.set_blink(self.color["white"]) # White blinking
+		elif(event == Events.CONNECTED): 
+			self.set_lights(self.color["white"]) # White on
+		elif(event == Events.DISCONNECTED):
+			self.set_lights(["green"])# Green on
+			self.clr_lights(["red", "blue"]) 
 		# elif(event == (Events.PRINT_STARTED or Events.PRINT_RESUMED)):
 		# 	self.set_lights(["red", "green", "blue"]) # White on
 		elif(event == Events.UPLOAD):
 			self.set_lights(["blue"]) # Blue on
 			self.clr_lights(["red", "green"])
-		elif(event == Events.DISCONNECTED):
-			self.set_lights(["green"])# Green on
-			self.clr_lights(["red", "blue"]) 
 		# elif(event == Events.PRINT_PAUSED):
 		# 	self.set_lights(["red"])  # Red on
 		# 	self.clr_lights(["green", "blue"]) 
-		elif(event == Events.CONNECTING):
-			self.set_blink(["red", "green", "blue"]) # White blinking
 		# elif(event == Events.PRINT_DONE):
 		# 	self.set_blink(["blue"]) # Blue blinking
 		# 	self.clr_blink(["red", "green"])
@@ -210,8 +216,18 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		# 	self.clr_blink(["blue", "green"]) 
 		elif(event == "PrinterStateChanged"):
 			self._logger.info("Printer state changed to {}".format(payload['state_string']))
-			# if (payload == "PRINTING"):
-			# 	self.set_lights(["red", "green", "blue"])
+			# if (payload['state_string'] == "Operational"):
+			# 	self.set_lights(self.color["white"])
+			if(payload['state_string'] == "Printing"):
+				self.clr_blink(self.color["white"]) 
+				self.set_lights(self.color["white"]) 	  # white
+			elif(payload['state_string'] == "Paused"):
+				self.set_lights(["red"])  				  # Red
+				self.clr_lights(["green", "blue"]) 
+			elif(payload['state_string'] == "Cancelling"):
+				self.set_blink(["red"])  			# Red blinking
+				self.clr_blink(["blue", "green"]) 
+
 
 ###################### 			LOCK CTRL				##################################
 
