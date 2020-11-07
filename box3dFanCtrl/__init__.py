@@ -276,7 +276,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		rot_fr = 50 # frequency of rotation
 		fil_feedRate = (drv_wheel*math.pi)/(steps/rot_fr) #200 steps, 50 Hz = 200/50 = 1x round in 4 sec
 		sec = float(dst_loader/fil_feedRate)
-		self._logger.info("Wait time calculated: {}".format(sec))
+		self._logger.info("Wait time calculated: {} s".format(sec))
 
 
 		# Heat nozzel to desired temperature
@@ -304,9 +304,11 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		# load_filament_loader(meters)
 		# load_filament_extruder(meters) # <== dit is Gcode: G91 - G21 - G1 E-100 F1000 (zie to_do.klad)
 
+		self.pi.hardware_PWM(self.pin["ldr"], rot_fr, 0)
 		self.pi.write(self.pin["dir"],pigpio.LOW)
 		return jsonify(success=True) # Spin steppermotor
 	
+
 	def send_gcode_command(self, command):
 			for line in command.split('\n'):
 				if line:
