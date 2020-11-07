@@ -189,26 +189,28 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def on_event(self, event, payload):
 		if(event == Events.CONNECTED): 
 			self.set_lights(["red", "green", "blue"]) # White on
-		elif(event == (Events.PRINT_STARTED or Events.PRINT_RESUMED)):
-			self.set_lights(["red", "green", "blue"]) # White on
+		# elif(event == (Events.PRINT_STARTED or Events.PRINT_RESUMED)):
+		# 	self.set_lights(["red", "green", "blue"]) # White on
 		elif(event == Events.UPLOAD):
 			self.set_lights(["blue"]) # Blue on
 			self.clr_lights(["red", "green"])
 		elif(event == Events.DISCONNECTED):
 			self.set_lights(["green"])# Green on
 			self.clr_lights(["red", "blue"]) 
-		elif(event == Events.PRINT_PAUSED):
-			self.set_lights(["red"])  # Red on
-			self.clr_lights(["green", "blue"]) 
+		# elif(event == Events.PRINT_PAUSED):
+		# 	self.set_lights(["red"])  # Red on
+		# 	self.clr_lights(["green", "blue"]) 
 		elif(event == Events.CONNECTING):
 			self.set_blink(["red", "green", "blue"]) # White blinking
-		elif(event == Events.PRINT_DONE):
-			self.set_blink(["blue"]) # Blue blinking
-			self.clr_blink(["red", "green"])
-		elif(event == Events.PRINT_CANCELLED):
-			self.set_blink(["red"])  # Red blinking
-			self.clr_blink(["blue", "green"]) 
-
+		# elif(event == Events.PRINT_DONE):
+		# 	self.set_blink(["blue"]) # Blue blinking
+		# 	self.clr_blink(["red", "green"])
+		# elif(event == Events.PRINT_CANCELLED):
+		# 	self.set_blink(["red"])  # Red blinking
+		# 	self.clr_blink(["blue", "green"]) 
+		elif(event == "PrinterStateChanged"):
+			if (payload == "PRINTING"):
+				self.set_lights(["red", "green", "blue"])
 
 ###################### 			LOCK CTRL				##################################
 
