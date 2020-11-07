@@ -264,8 +264,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 ##
 	@octoprint.plugin.BlueprintPlugin.route('/LoadFilament', methods=["POST"])
 	def filament(self):
-		if(not(self._printer.is_operational())):
-			return jsonify(error=True)
+		if(not(self._printer.is_ready())):
+			return jsonify(success=False)
 		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
 		fil_noz	  =self.to_int(self._settings.get(["fil_noz"]))
 		dst_extr  =self.to_int(self._settings.get(["fil_extruder_value"])) # distance between extruder-3d printer and hot-end
