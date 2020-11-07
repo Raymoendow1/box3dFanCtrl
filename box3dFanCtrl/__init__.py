@@ -264,8 +264,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 ##
 	@octoprint.plugin.BlueprintPlugin.route('/LoadFilament', methods=["POST"])
 	def filament(self):
-		if(not(self._printer.is_ready())):
-			return jsonify(success=False, error=True)
+		if(not(self._printer.is_offline() or self._printer.is_ready())):
+			return jsonify(succes=False)
 		self._logger.info("Printer ready for filamentchange!")
 		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
 		fil_noz	  =self.to_int(self._settings.get(["fil_noz"]))
@@ -276,11 +276,13 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		rot_fr = 50 # frequency of rotation
 		fil_feedRate = (drv_wheel*math.pi)/(steps/rot_fr) #200 steps, 50 Hz = 200/50 = 1x round in 4 sec
 		sec = float(dst_loader/fil_feedRate)
+		self._logger.info("Wait time calculated: {}".format(sec))
 
 
 		# Heat nozzel to desired temperature
 		self.send_gcode_command("M104 S{}".format(fil_noz))
-		
+		# time.sleep(10)
+
 		# Load filament
 		if (dir==True): 
 			self.pi.write(self.pin["dir"],pigpio.HIGH)
@@ -288,12 +290,12 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			# wait for filament to reach the 3D-printer
 			time.sleep(sec) 
 			# Load filament in the printer
-			self.send_gcode_command("G1 E{} F500".format(dst_extr))
+			# self.send_gcode_command("G1 E{} F500".format(dst_extr)) # gecommend
 		
 		# Unload filament 
 		else: 
 			# move printer-extruder out first
-			self.send_gcode_command("G1 E-{} F500".format(dst_extr))
+			# self.send_gcode_command("G1 E-{} F500".format(dst_extr)) #gecommend
 			# then filament-steppermotor
 			self.pi.hardware_PWM(self.pin["ldr"], rot_fr, 500000)
 			time.sleep(sec+1) # system unloads longer to make sure everything is out
