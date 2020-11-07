@@ -26,7 +26,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 						 octoprint.plugin.EventHandlerPlugin):
 
 	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
-	pi = None
+	pi = pigpio.pi()
 	adc= None
 	color = { "white":["red","green","blue"]}
 
@@ -41,7 +41,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	##~~ StartupPlugin mixin
 	def on_after_startup(self):
 		self._logger.info("box3d Industrial plugin is life.")
-		self.pi = pigpio.pi()
+		# self.pi = pigpio.pi()
 		self.init_temp()
 		self.init_lock()
 		self.init_lights()
@@ -269,8 +269,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		self._logger.info("Printer ready for filamentchange!")
 		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
 		fil_noz	  =self.to_int(self._settings.get(["fil_noz"]))
-		dst_extr  =self.to_int(self._settings.get(["fil_extruder_value"])) # distance between extruder-3d printer and hot-end
-		dst_loader=self.to_int(self._settings.get(["fil_loader_value"])) # distance between box3d filament input and extruder-3d printer
+		dst_extr  =self.to_int(self._settings.get(["fil_extr_v"])) # distance between extruder-3d printer and hot-end
+		dst_loader=self.to_int(self._settings.get(["fil_ldr_v"])) # distance between box3d filament input and extruder-3d printer
 		dir = True if request.values["fil_transport_state"] == 'filament_load' else False # true= loading, false=unloading
 		steps  = 200 # number of steps in the motor for full rotation
 		rot_fr = 50 # frequency of rotation
