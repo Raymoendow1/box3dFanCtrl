@@ -1,5 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import
+from os import error
 
 from flask.templating import render_template_string
 import octoprint.util
@@ -263,6 +264,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 ##
 	@octoprint.plugin.BlueprintPlugin.route('/LoadFilament', methods=["POST"])
 	def filament(self):
+		if(not(self._printer.is_operational())):
+			return jsonify(error=True)
 		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
 		fil_noz	  =self.to_int(self._settings.get(["fil_noz"]))
 		dst_extr  =self.to_int(self._settings.get(["fil_extruder_value"])) # distance between extruder-3d printer and hot-end

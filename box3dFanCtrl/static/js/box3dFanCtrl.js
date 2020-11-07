@@ -296,6 +296,13 @@ $(function() {
                         text: "Filament state (variable): " + String(self.fil_trsprt_s()),
                         type: "success"
                     });
+                },
+                error: function() {
+                    new PNotify({
+                        title: "box3d Industrial",
+                        text: "Print still in progress",
+                        type: "error"
+                    });
                 }
             });
         };
