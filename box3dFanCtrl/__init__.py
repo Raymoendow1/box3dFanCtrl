@@ -143,7 +143,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def set_fanspeed(self, pwm_val):
 			# set pwm to pwm_val
-			fanval=1000000-pwm_val
+			fanval=100-pwm_val
+			fanval*=10000
 			self.pi.hardware_PWM(12, 25000, fanval)
 
 

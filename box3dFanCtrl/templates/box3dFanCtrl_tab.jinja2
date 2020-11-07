@@ -81,7 +81,7 @@
     <table>
         <tr>
             <td style="width: 150px;">Fan speed</td>
-            <td><input type="range" min="1" max="1000000" data-bind="value: $root.fan_speed, valueUpdate: 'input', enable: (!$root.FanConfig()) && $root.login()"></td>
+            <td><input type="range" min="1" max="100" data-bind="value: $root.fan_speed, valueUpdate: 'input', enable: (!$root.FanConfig()) && $root.login()"></td>
             <td><output data-bind="value: fan_speed"></output></td>
         </tr>
         <!-- ko if: $root.FanConfig() -->
