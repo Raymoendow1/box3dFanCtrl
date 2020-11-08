@@ -27,9 +27,13 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
 	pi = pigpio.pi()
-	adc= None
+	adc= pi.spi_open(0x2, 2000000, 0x162)
 	color = { "white":["red","green","blue"],"red":["red"],"green":["green"],"blue":["blue"]}
 	allColor={"red":"red", "green":"green", "blue":"blue"}
+
+	# baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
+		# spi_channel = 0x2
+		# spi_flags = 0x162
 
 	@staticmethod
 	def to_int(value):
@@ -52,7 +56,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def get_settings_defaults(self):
 		return dict(
 			slidVal=20, FanConfig=True, box3d_temp="25", box3d_tartemp="60"
-			, fan_speed="1", fan_speed_min="20", fan_speed_max="90" 		# temp crl vars
+			, fan_speed="1", fan_speed_min="20", fan_speed_max="90" 			# temp crl vars
 			, LightColorRed=False, LightColorGreen=False, LightColorBlue=False  # Light vars
 			, fil_trsprt_s=True, fil_ldr_v="1000", fil_extr_v="50"
 			, fil_dw="100", fil_noz="200"										# filament loader vars
@@ -71,11 +75,11 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 ########################## FAN AND TEMPERATURE CTRL ##################################
 
-	def init_temp(self):
-		baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
-		spi_channel = 0x2
-		spi_flags = 0x162
-		self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
+	# def init_temp(self):
+		# baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
+		# spi_channel = 0x2
+		# spi_flags = 0x162
+		# self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
 
 	def get_adc(self):
 		(bytes, data) = self.pi.spi_read(self.adc, 2)

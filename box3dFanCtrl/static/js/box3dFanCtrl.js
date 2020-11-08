@@ -54,7 +54,7 @@ $(function() {
         };
 
         self.onSettingsBeforeSave = function() {
-            self.settings.settings.plugins.box3dFanCtrl.login(self.login());
+            self.settings.settings.plugins.box3dFanCtrl.login(false);
 
             self.settings.settings.plugins.box3dFanCtrl.fil_trsprt_s(self.fil_trsprt_s());
 
@@ -96,7 +96,7 @@ $(function() {
                 "TargTemp": self.box3d_tartemp()
             };
             $.ajax({
-                url: self.buildPluginUrl("/getTemperature"),
+                url: self.buildPluginUrl("/setLight"),
                 type: "GET",
                 data: request,
                 dataType: "json",
@@ -140,7 +140,7 @@ $(function() {
                 type: "POST",
                 dataType: "json",
                 data: request,
-                url: self.buildPluginUrl("/toggleLight"),
+                url: self.buildPluginUrl("/setLight"),
                 success: function(data) {
                     new PNotify({
                         title: "box3d Industrial",
@@ -159,7 +159,7 @@ $(function() {
                 type: "POST",
                 dataType: "json",
                 data: request,
-                url: self.buildPluginUrl("/toggleLight"),
+                url: self.buildPluginUrl("/setLight"),
                 success: function(data) {
                     new PNotify({
                         title: "box3d Industrial",
@@ -179,7 +179,7 @@ $(function() {
                 type: "POST",
                 dataType: "json",
                 data: request,
-                url: self.buildPluginUrl("/toggleLight"),
+                url: self.buildPluginUrl("/setLight"),
                 success: function(data) {
                     new PNotify({
                         title: "box3d Industrial",
@@ -199,7 +199,7 @@ $(function() {
                 type: "POST",
                 dataType: "json",
                 data: request,
-                url: self.buildPluginUrl("/toggleLight"),
+                url: self.buildPluginUrl("/setLight"),
                 success: function(data) {
                     new PNotify({
                         title: "box3d Industrial",
@@ -219,7 +219,7 @@ $(function() {
                 type: "POST",
                 dataType: "json",
                 data: request,
-                url: self.buildPluginUrl("/toggleLight"),
+                url: self.buildPluginUrl("/setLight"),
                 success: function(data) {
                     new PNotify({
                         title: "box3d Industrial",
