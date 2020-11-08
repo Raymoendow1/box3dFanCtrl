@@ -96,7 +96,7 @@ $(function() {
                 "TargTemp": self.box3d_tartemp()
             };
             $.ajax({
-                url: self.buildPluginUrl("/setLight"),
+                url: self.buildPluginUrl("/getTemperature"),
                 type: "GET",
                 data: request,
                 dataType: "json"
