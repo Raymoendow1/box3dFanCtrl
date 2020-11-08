@@ -54,7 +54,7 @@ $(function() {
         };
 
         self.onSettingsBeforeSave = function() {
-            self.settings.settings.plugins.box3dFanCtrl.login(false);
+            self.settings.settings.plugins.box3dFanCtrl.login(self.login());
 
             self.settings.settings.plugins.box3dFanCtrl.fil_trsprt_s(self.fil_trsprt_s());
 
