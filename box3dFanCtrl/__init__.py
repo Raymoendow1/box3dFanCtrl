@@ -27,7 +27,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
 	pi = pigpio.pi()
-	adc= pi.spi_open(0x2, 2000000, 0x162)
+	adc= None #pi.spi_open(0x2, 2000000, 0x162)
 	color = { "white":["red","green","blue"],"red":["red"],"green":["green"],"blue":["blue"]}
 	allColor={"red":"red", "green":"green", "blue":"blue"}
 
@@ -47,7 +47,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def on_after_startup(self):
 		self._logger.info("box3d Industrial plugin is life.")
 		# self.pi = pigpio.pi()
-		# self.init_temp()
+		self.init_temp()
 		self.init_lock()
 		self.init_lights()
 		self.set_fanspeed(1)
@@ -75,11 +75,11 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 ########################## FAN AND TEMPERATURE CTRL ##################################
 
-	# def init_temp(self):
-		# baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
-		# spi_channel = 0x2
-		# spi_flags = 0x162
-		# self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
+	def init_temp(self):
+		baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
+		spi_channel = 0x2
+		spi_flags = 0x162
+		self.adc = self.pi.spi_open(spi_channel, baud, spi_flags)
 
 	def get_adc(self):
 		(bytes, data) = self.pi.spi_read(self.adc, 2)
