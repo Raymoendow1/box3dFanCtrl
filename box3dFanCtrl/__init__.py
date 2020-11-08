@@ -1,6 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import
-from os import error
+from os import error, set_inheritable
 
 from flask.templating import render_template_string
 import octoprint.util
@@ -28,7 +28,8 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
 	pi = pigpio.pi()
 	adc= None
-	color = { "white":["red","green","blue"]}
+	color = { "white":["red","green","blue"],"red":["red"],"green":["green"],"blue":["blue"]}
+	allColor={"red":"red", "green":"green", "blue":"blue"}
 
 	@staticmethod
 	def to_int(value):
@@ -51,7 +52,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def get_settings_defaults(self):
 		return dict(
 			slidVal=20, FanConfig=True, box3d_temp="25", box3d_tartemp="60"
-			, fan_speed="1", fan_speed_min="5", fan_speed_max="900000" 		# temp crl vars
+			, fan_speed="1", fan_speed_min="20", fan_speed_max="90" 		# temp crl vars
 			, LightColorRed=False, LightColorGreen=False, LightColorBlue=False  # Light vars
 			, fil_trsprt_s=True, fil_ldr_v="1000", fil_extr_v="50"
 			, fil_dw="100", fil_noz="200"										# filament loader vars
@@ -150,20 +151,24 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 ##################################		LIGHT CTRL		#######################################
 
+# init light control
 	def init_lights(self):
 		for i in ( "red", "green", "blue"):
 			self.pi.set_mode(self.pin[i], pigpio.OUTPUT)
 
+# turns on blink selected colors
 	def set_blink(self, colors):
 		for color in colors:
 			self.pi.set_PWM_dutycycle(self.pin[color], 128)
 			self.pi.set_PWM_frequency(self.pin[color], 5)
 	
+# turns of blink unselected colors
 	def clr_blink(self, colors):
 		for color in colors:
 			self.pi.set_PWM_dutycycle(self.pin[color], 0)
 			self.pi.set_PWM_frequency(self.pin[color], 0)
 
+# turns on selected colors
 	def set_lights(self, colors):
 		for color in colors:
 			if(color == "white"):
@@ -173,18 +178,34 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 				break
 			self.pi.write(self.pin[color], 1)
 
+# turns off selected colors
 	def clr_lights(self, colors):
 		for color in colors:
 			self.pi.write(self.pin[color], 0)
+
+# turns on selected colors and turns off unselected colors
+	def set_color(self, inp_color):
+		for color in self.allColor:
+			if (inp_color == color):
+				self.set_lights(color)
+			else:
+				self.clr_lights(color)
+
+# blinks selected colors and turns off blink unselected colors
+	def set_color_blink(self, inp_color):
+		for color in self.allColor:
+			if (inp_color == color):
+				self.set_blink(color)
+			else:
+				self.clr_blink(color)
 
 	@octoprint.plugin.BlueprintPlugin.route('/KillBlink', methods=["POST"])
 	def kill_blink(self):
 		self.clr_blink(("red", "green", "blue"))
 		return jsonify(success=True)
-		
-	## weird flask things happening here
+	
 	# get the new RGB-light value from the Tab-menu
-	@octoprint.plugin.BlueprintPlugin.route("/toggleLight", methods=["POST"])
+	@octoprint.plugin.BlueprintPlugin.route("/setLight", methods=["POST"])
 	def toggle_lights(self):
 		color = request.values["color"]
 		lightState = True if request.values["state"] == 'true' else False 
@@ -194,32 +215,24 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			self.clr_lights([color])
 		return jsonify(success=True)
 
+
 	def on_event(self, event, payload):
 		if(event == Events.CONNECTING):
-			self.set_blink(self.color["white"]) # White blinking
+			self.set_color_blink(self.color["white"]) # White blinking
 		elif(event == Events.CONNECTED): 
-			self.set_lights(self.color["white"]) # White on
+			self.set_color(self.color["white"])	# White on
 		elif(event == Events.DISCONNECTED):
-			self.set_lights(["green"])# Green on
-			self.clr_lights(["red", "blue"]) 
-		# elif(event == (Events.PRINT_STARTED or Events.PRINT_RESUMED)):
-		# 	self.set_lights(["red", "green", "blue"]) # White on
+			self.set_color(["green"])			# Green on
 		elif(event == Events.UPLOAD):
-			self.set_lights(["blue"]) # Blue on
-			self.clr_lights(["red", "green"])
+			self.set_color(["blue"]) 			# Blue on
 		elif(event == "PrinterStateChanged"):
 			self._logger.info("Printer state changed to {}".format(payload['state_string']))
-			# if (payload['state_string'] == "Operational"):
-			# 	self.set_lights(self.color["white"])
 			if(payload['state_string'] == "Printing"):
-				self.clr_blink(self.color["white"]) 
-				self.set_lights(self.color["white"]) 	  # white
+				self.set_color(self.color["white"]) 	  	# white
 			elif(payload['state_string'] == "Pausing"):
-				self.set_lights(["red"])  				  # Red
-				self.clr_lights(["green", "blue"]) 
+				self.set_color(["red"])  				  	# Red
 			elif(payload['state_string'] == "Cancelling"):
-				self.set_blink(["red"])  			# Red blinking
-				self.clr_blink(["blue", "green"]) 
+				self.set_color_blink(["red"])  				# Red blinking
 
 
 ###################### 			LOCK CTRL				##################################
