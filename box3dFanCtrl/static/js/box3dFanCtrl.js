@@ -99,14 +99,14 @@ $(function() {
                 url: self.buildPluginUrl("/setLight"),
                 type: "GET",
                 data: request,
-                dataType: "json",
-                // success: function(data) {
-                //     new PNotify({
-                //         title: "box3d Industrial",
-                //         text: "New temp " + self.box3d_temp() + " measured",
-                //         type: "success"
-                //     });
-                // }
+                dataType: "json"
+                    // ,success: function(data) {
+                    //     new PNotify({
+                    //         title: "box3d Industrial",
+                    //         text: "New temp " + self.box3d_temp() + " measured",
+                    //         type: "success"
+                    //     });
+                    // }
             });
         }, 500);
 
