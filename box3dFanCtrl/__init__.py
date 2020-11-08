@@ -1,6 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import
-from os import error, set_inheritable
+from os import error
 
 from flask.templating import render_template_string
 import octoprint.util
