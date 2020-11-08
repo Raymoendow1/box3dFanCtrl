@@ -26,7 +26,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 						 octoprint.plugin.EventHandlerPlugin):
 
 	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
-	pi = pigpio.pi()
+	pi = None #pigpio.pi()
 	adc= None #pi.spi_open(0x2, 2000000, 0x162)
 	color = { "white":["red","green","blue"],"red":["red"],"green":["green"],"blue":["blue"]}
 	allColor={"red":"red", "green":"green", "blue":"blue"}
@@ -46,7 +46,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	##~~ StartupPlugin mixin
 	def on_after_startup(self):
 		self._logger.info("box3d Industrial plugin is life.")
-		# self.pi = pigpio.pi()
+		self.pi = pigpio.pi()
 		self.init_temp()
 		self.init_lock()
 		self.init_lights()
