@@ -47,7 +47,7 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 	def on_after_startup(self):
 		self._logger.info("box3d Industrial plugin is life.")
 		# self.pi = pigpio.pi()
-		self.init_temp()
+		# self.init_temp()
 		self.init_lock()
 		self.init_lights()
 		self.set_fanspeed(1)
