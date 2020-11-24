@@ -226,17 +226,20 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		if(event == Events.CONNECTING):
 			self.set_blink(self.color["white"]) # White blinking
 		elif(event == Events.CONNECTED): 
-			self.set_color(self.color["white"])	# White on
+			self.set_lights(["white"])
 		elif(event == Events.DISCONNECTED):
-			self.set_color(self.color["green"])			# Green on
+			self.set_lights(["green"])			# Green on
+			self.clr_lights(["red", "blue"])
 		elif(event == Events.UPLOAD):
-			self.set_color(self.color["blue"]) 			# Blue on
+			self.set_lights(["blue"])			# Blue on
+			self.clr_lights(["red", "green"])
 		elif(event == "PrinterStateChanged"):
 			self._logger.info("Printer state changed to {}".format(payload['state_string']))
 			if(payload['state_string'] == "Printing"):
-				self.set_color(self.color["white"]) 	  	# white
+				self.set_lights(["white"]) 	  	# white
 			elif(payload['state_string'] == "Pausing"):
-				self.set_color(self.color["red"])  				  	# Red
+				self.set_lights(["red"])  				  	# Red
+				self.clr_lights(["blue", "green"])
 			elif(payload['state_string'] == "Cancelling"):
 				self.clr_blink(self.color["white"])			#clr all blinking colors
 				self.set_blink(self.color["red"])  			# Red blinking
