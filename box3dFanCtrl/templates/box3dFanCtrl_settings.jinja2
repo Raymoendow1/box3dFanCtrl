@@ -15,7 +15,7 @@
         <br>
         <label for="nozzle"><b>Nozzle temperature</b></label>
         <div>The desired temperature for the nozzle to (un)load filament.</div>
-        <input type="number" style="width: 7ch;" max="1000" id="nozzle" data-bind="value: settings.plugins.box3dFanCtrl.fil_noz, enable: settings.plugins.box3dFanCtrl.login()"> &#176;C
+        <input type="number" style="width: 7ch;" max="450" id="nozzle" data-bind="value: settings.plugins.box3dFanCtrl.fil_noz, enable: settings.plugins.box3dFanCtrl.login()"> &#176;C
         <br>
         <label for="filament_loader"><b>Distance of filament-input to printer-extruder</b></label>
         <div>This controls how long the filament-stepper motor will rotate.</div>
@@ -30,13 +30,13 @@
         <label for="fanMax"><b>Maximum fan speed</b></label>
         <div>You can only change maximum fan speed while logged in.</div>
         <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
-        <input type="number" id="fanMax" min="0" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_max" />
+        <input type="number" id="fanMax" min="0" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_max" /> %
         <!-- /ko -->
         <br><br>
         <label for="fanMin"><b>Minimum fan speed</b></label>
         <div>You can only change minimum fan speed while logged in.</div>
         <!-- ko if: settings.plugins.box3dFanCtrl.login() -->
-        <input type="number" id="fanMin" min="0" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_min" />
+        <input type="number" id="fanMin" min="0" max="100" data-bind="value: settings.plugins.box3dFanCtrl.fan_speed_min" /> %
         <!-- /ko -->
     </div>
 </div>

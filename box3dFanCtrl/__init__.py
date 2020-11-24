@@ -27,10 +27,10 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	pin = {"red":27, "green" :22, "blue":10, "lock":17, "lockStat":18,"ldr":13, "dir": 26 }
 	pi = pigpio.pi()
-	adc= pi.spi_open(0x2, 2000000, 0x162) # None
+	adc= pi.spi_open(0x2, 2000000, 0x162)
 	color = { "white":["red","green","blue"],"red":["red"],"green":["green"],"blue":["blue"]}
 	allColor={"red":"red", "green":"green", "blue":"blue"}
-
+	
 	
 		# baud = 2000000 # 2MHz SPI-clock, room between 4MHz or 1MHz
 		# spi_channel = 0x2
@@ -224,21 +224,22 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 	def on_event(self, event, payload):
 		if(event == Events.CONNECTING):
-			self.set_color_blink(self.color["white"]) # White blinking
+			self.set_blink(self.color["white"]) # White blinking
 		elif(event == Events.CONNECTED): 
 			self.set_color(self.color["white"])	# White on
 		elif(event == Events.DISCONNECTED):
-			self.set_color(["green"])			# Green on
+			self.set_color(self.color["green"])			# Green on
 		elif(event == Events.UPLOAD):
-			self.set_color(["blue"]) 			# Blue on
+			self.set_color(self.color["blue"]) 			# Blue on
 		elif(event == "PrinterStateChanged"):
 			self._logger.info("Printer state changed to {}".format(payload['state_string']))
 			if(payload['state_string'] == "Printing"):
 				self.set_color(self.color["white"]) 	  	# white
 			elif(payload['state_string'] == "Pausing"):
-				self.set_color(["red"])  				  	# Red
+				self.set_color(self.color["red"])  				  	# Red
 			elif(payload['state_string'] == "Cancelling"):
-				self.set_color_blink(["red"])  				# Red blinking
+				self.clr_blink(self.color["white"])			#clr all blinking colors
+				self.set_blink(self.color["red"])  			# Red blinking
 
 
 ###################### 			LOCK CTRL				##################################
@@ -283,14 +284,14 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 # 	gestroomlijnt ingeladen kan worden
 ##
 	@octoprint.plugin.BlueprintPlugin.route('/LoadFilament', methods=["POST"])
-	def filament(self):
+	def load_filament(self):
 		if(not(self._printer.is_closed_or_error() or self._printer.is_ready())):
 			return jsonify(succes=False)
 		self._logger.info("Printer ready for filamentchange!")
 		drv_wheel =self.to_int(self._settings.get(["fil_dw"]))
 		fil_noz	  =self.to_int(self._settings.get(["fil_noz"]))
 		dst_extr  =self.to_int(self._settings.get(["fil_extr_v"])) # distance between extruder-3d printer and hot-end
-		dst_loader=self.to_int(self._settings.get(["fil_ldr_v"])) # distance between box3d filament input and extruder-3d printer
+		dst_loader=self.to_int(self._settings.get(["fil_ldr_v"]))  # distance between box3d filament input and extruder-3d printer
 		dir = True if request.values["fil_transport_state"] == 'filament_load' else False # true= loading, false=unloading
 		steps  = 200 # number of steps in the motor for full rotation
 		rot_fr = 50 # frequency of rotation
@@ -298,10 +299,9 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 		sec = float(dst_loader/fil_feedRate)
 		self._logger.info("Wait time calculated: {} s".format(sec))
 
-
-		# Heat nozzel to desired temperature
+		# Heat nozzle to desired temperature
 		self.send_gcode_command("M104 S{}".format(fil_noz))
-		# time.sleep(10)
+		time.sleep(10) # wait untill nozzle warmed up
 
 		# Load filament
 		if (dir==True): 
@@ -310,19 +310,17 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 			# wait for filament to reach the 3D-printer
 			time.sleep(sec) 
 			# Load filament in the printer
-			# self.send_gcode_command("G1 E{} F500".format(dst_extr)) # gecommend
+			if (dst_extr):
+				self.send_gcode_command("G1 E{} F500".format(dst_extr)) # gecommend
 		
 		# Unload filament 
 		else: 
-			# move printer-extruder out first
-			# self.send_gcode_command("G1 E-{} F500".format(dst_extr)) #gecommend
+			# load printer-extruder out first
+			if (dst_extr):
+				self.send_gcode_command("G1 E-{} F500".format(dst_extr)) #gecommend
 			# then filament-steppermotor
 			self.pi.hardware_PWM(self.pin["ldr"], rot_fr, 500000)
 			time.sleep(sec+1) # system unloads longer to make sure everything is out
-
-		# Maak volgorde afhankelijk van in- en uitladen
-		# load_filament_loader(meters)
-		# load_filament_extruder(meters) # <== dit is Gcode: G91 - G21 - G1 E-100 F1000 (zie to_do.klad)
 
 		self.pi.hardware_PWM(self.pin["ldr"], 0, 0)
 		self.pi.write(self.pin["dir"],pigpio.LOW)
@@ -350,13 +348,9 @@ class Box3dfanctrlPlugin(octoprint.plugin.BlueprintPlugin,
 
 
 	def on_settings_save(self, data):
-		# old_slidVal 		= self._settings.get_int	(['slidVal'])
 		# Old saved value
 		octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
 		# New saved value
-		# new_slidVal 		= self._settings.get_int	(['slidVal'])
-		login = self._settings.get_boolean	(['login'])
-		self._logger.info("New login state: %s" % login)
 
 	##~~ TemplatePlugin mixin
 	def get_template_configs(self):
